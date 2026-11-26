@@ -28,3 +28,7 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Divya Yatra implementation rule
+
+- Keep the invitation static on TanStack Start, with seven file-based content pages, the six consolidated `src/data` modules, shared presentation components, and one local link-generation utility; this avoids backend scope and duplicated page logic.
