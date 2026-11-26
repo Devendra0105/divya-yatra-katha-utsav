@@ -28,7 +28,7 @@ export function SiteFrame({ children }: { children: ReactNode }) {
             </p>
           </div>
           <Link
-            to="/information"
+            to="/information" as any
             className="inline-flex items-center gap-2 text-sm text-primary-foreground transition-colors hover:text-secondary"
           >
             संपर्क एवं आवश्यक सूचनाएँ <span aria-hidden="true">↗</span>
@@ -64,7 +64,7 @@ function SiteHeader() {
             return (
               <Link
                 key={item.to}
-                to={item.to}
+                to={item.to as any}
                 className={`whitespace-nowrap border-b-2 px-2 py-2 text-sm transition-colors ${
                   isActive
                     ? "border-primary text-primary"
@@ -98,7 +98,7 @@ function SiteHeader() {
         {navigation.map((item) => (
           <Link
             key={item.to}
-            to={item.to}
+            to={item.to as any}
             onClick={() => setMenuOpen(false)}
             className={`border-b border-border px-2 py-3 text-sm ${
               pathname === item.to ? "font-semibold text-primary" : "text-foreground"
