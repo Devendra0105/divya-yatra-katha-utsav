@@ -128,6 +128,7 @@ function InviteSection() {
         className="mx-auto my-6 h-56 w-36 border border-secondary object-cover object-center shadow-md"
         loading="lazy"
         decoding="async"
+    
       />
 
       <ul className="space-y-3 text-sm text-foreground">
