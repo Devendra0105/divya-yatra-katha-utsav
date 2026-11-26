@@ -1,13 +1,27 @@
-import { useState } from "react";
-import { Link, useSearch } from "@tanstack/react-router";
-import { ArrowRight, CalendarDays, Clock3, MapPin, Sparkles } from "lucide-react";
+import { useState, type ReactNode } from "react";
+import { useSearch } from "@tanstack/react-router";
+import { CalendarDays, Clock3, MapPin, Phone, Sparkles } from "lucide-react";
 
 import jagannathArtwork from "@/assets/divya-yatra/jagannath-artwork.jpg.asset.json";
-import lotusMandala from "@/assets/divya-yatra/lotus-mandala.jpg.asset.json";
+import { DestinationExplorer } from "@/components/destination-explorer";
 import { Button } from "@/components/ui/button";
+import {
+  DetailList,
+  EmptyDetails,
+  OrnamentalDivider,
+  PageSection,
+  PhoneShell,
+  SiteFrame,
+} from "@/components/site-chrome";
+import { accommodation } from "@/data/accommodation";
+import { chiefGuests, distinguishedGuests, type GuestProfile } from "@/data/guests";
+import { contactGroups, instructions, yajmanContact } from "@/data/instructions";
 import { katha } from "@/data/katha";
+import { videos } from "@/data/videos";
 import { sanitizeInviteeName } from "@/lib/invitation";
-import { OrnamentalDivider, PageWidth, SiteFrame } from "@/components/site-chrome";
+
+const formatRupees = (amount: number) => `₹${amount.toLocaleString("en-IN")}/-`;
+const journeyNote = "जयपुर से आरंभ, जयपुर में समापन";
 
 export function InvitationPage() {
   const [opened, setOpened] = useState(false);
@@ -33,143 +47,323 @@ function InvitationCover({
   onOpen: () => void;
 }) {
   return (
-    <main className="invitation-cover relative isolate flex min-h-svh items-center justify-center overflow-hidden bg-primary px-5 py-10 text-primary-foreground">
-      <img
-        src={lotusMandala.url}
-        alt=""
-        aria-hidden="true"
-        className="absolute inset-0 -z-20 h-full w-full object-cover opacity-70"
-        fetchPriority="high"
-      />
-      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-primary/80" />
-      <div aria-hidden="true" className="absolute inset-3 border border-secondary/80 sm:inset-6" />
-      <div aria-hidden="true" className="absolute inset-5 border border-secondary/40 sm:inset-8" />
+    <PhoneShell className="invitation-cover">
+      <main className="flex min-h-svh flex-col items-center justify-center px-7 py-[max(19svh,8.5rem)] text-center">
+        <div className="entry-reveal flex w-full flex-col items-center">
+          <img
+            src={jagannathArtwork.url}
+            alt="भगवान श्री जगन्नाथ का चित्र"
+            className="mb-3 h-28 w-20 border border-secondary object-cover object-center shadow-md"
+            fetchPriority="high"
+          />
+          <p className="text-sm text-primary">{katha.organizers}</p>
+          <OrnamentalDivider />
+          <p className="text-sm text-muted-foreground">सप्रेम आमंत्रण</p>
+          <h1 className="mt-1 text-[1.65rem] leading-[1.5] text-primary">{katha.title}</h1>
+          <p className="mt-2 font-display text-xl leading-[1.5] text-foreground">
+            {guestName ? `आदरणीय ${guestName} जी` : "आप सादर आमंत्रित हैं"}
+          </p>
+          <p className="mt-1 text-sm leading-6 text-foreground/85">{katha.location}</p>
+          <p className="text-sm text-muted-foreground">
+            {katha.startDate} से {katha.endDate}
+          </p>
+          <Button className="mt-5 min-h-12 px-8" onClick={onOpen} size="lg">
+            <Sparkles aria-hidden="true" />
+            निमंत्रण खोलें
+          </Button>
+          <p className="mt-3 text-xs text-muted-foreground">शुभारंभ हेतु स्पर्श करें</p>
+        </div>
+      </main>
+    </PhoneShell>
+  );
+}
 
-      <div className="entry-reveal relative z-10 mx-auto flex w-full max-w-3xl flex-col items-center text-center">
-        <img
-          src={jagannathArtwork.url}
-          alt="भगवान श्री जगन्नाथ का चित्र"
-          className="mb-5 h-36 w-24 border border-secondary/80 object-cover object-center shadow-lg sm:h-44 sm:w-28"
-          fetchPriority="high"
-        />
-        <p className="text-sm font-semibold text-secondary sm:text-base">{katha.organizers}</p>
-        <OrnamentalDivider light />
-        <p className="text-sm text-primary-foreground/80">सप्रेम आमंत्रण</p>
-        <h1 className="mt-3 font-display text-3xl leading-tight text-primary-foreground sm:text-5xl">
-          {katha.title}
-        </h1>
-        <p className="mt-5 font-display text-xl text-secondary sm:text-2xl">
-          {guestName ? `आदरणीय ${guestName} जी` : "आप सादर आमंत्रित हैं"}
-        </p>
-        <p className="mt-3 max-w-xl text-sm leading-7 text-primary-foreground/85 sm:text-base">
-          {katha.location}
-        </p>
-        <p className="mt-1 text-sm text-primary-foreground/75">
-          {katha.startDate} से {katha.endDate}
-        </p>
-        <Button
-          className="mt-8 min-h-12 border-secondary bg-transparent px-7 text-primary-foreground hover:bg-primary-foreground/10"
-          onClick={onOpen}
-          size="lg"
-          variant="outline"
-        >
-          <Sparkles aria-hidden="true" />
-          निमंत्रण खोलें
-        </Button>
-        <p className="mt-5 text-xs text-primary-foreground/70">शुभारंभ हेतु स्पर्श करें</p>
-      </div>
-    </main>
+function AnchorButton({
+  href,
+  variant = "default",
+  children,
+}: {
+  href: string;
+  variant?: "default" | "outline";
+  children: ReactNode;
+}) {
+  return (
+    <Button asChild className="h-auto min-h-12 w-full whitespace-normal py-2" variant={variant}>
+      <a href={href}>{children}</a>
+    </Button>
   );
 }
 
 function InvitationContent() {
   return (
     <>
-      <section className="relative isolate overflow-hidden bg-primary py-16 text-primary-foreground sm:py-24">
-        <img
-          src={lotusMandala.url}
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 -z-20 h-full w-full object-cover opacity-70"
-        />
-        <div aria-hidden="true" className="absolute inset-0 -z-10 bg-primary/85" />
-        <PageWidth className="text-center">
-          <p className="text-sm font-semibold text-secondary">सप्रेम आमंत्रण</p>
-          <OrnamentalDivider light />
-          <h1 className="mx-auto max-w-4xl font-display text-3xl leading-tight text-primary-foreground sm:text-5xl">
-            {katha.title}
-          </h1>
-          <p className="mt-4 text-lg text-secondary sm:text-xl">{katha.location}</p>
-          <div className="my-8 flex justify-center">
+      <InviteSection />
+      <KathaSection />
+      <PageSection id="darshan" eyebrow="दर्शन" title="तीर्थ स्थलों के दर्शन">
+        <DestinationExplorer />
+      </PageSection>
+      <TravelSection />
+      <PageSection id="chief-guests" eyebrow="अतिथि" title="मुख्य अतिथि">
+        <GuestList guests={chiefGuests} title="मुख्य अतिथि" />
+      </PageSection>
+      <PageSection id="distinguished-guests" eyebrow="अतिथि" title="विशिष्ट अतिथि">
+        <GuestList guests={distinguishedGuests} title="विशिष्ट अतिथि" />
+      </PageSection>
+      <InformationSection />
+    </>
+  );
+}
+
+function InviteSection() {
+  return (
+    <section id="invite" className="band-top px-5 pb-10 text-center">
+      <p className="font-display text-base text-primary">सप्रेम आमंत्रण</p>
+      <OrnamentalDivider />
+      <h1 className="text-[1.9rem] leading-[1.5] text-primary">{katha.title}</h1>
+      <p className="mt-2 text-base leading-7 text-foreground">{katha.location}</p>
+
+      <img
+        src={jagannathArtwork.url}
+        alt="भगवान श्री जगन्नाथ का चित्र"
+        className="mx-auto my-6 h-56 w-36 border border-secondary object-cover object-center shadow-md"
+        loading="lazy"
+        decoding="async"
+      />
+
+      <ul className="space-y-3 text-sm text-foreground">
+        <li className="flex items-center justify-center gap-2">
+          <CalendarDays aria-hidden="true" className="size-4 shrink-0 text-primary" />
+          {katha.startDate} – {katha.endDate}
+        </li>
+        <li className="flex items-center justify-center gap-2">
+          <Clock3 aria-hidden="true" className="size-4 shrink-0 text-primary" />
+          {katha.durationDays} दिवसीय यात्रा
+        </li>
+        <li className="flex items-center justify-center gap-2">
+          <MapPin aria-hidden="true" className="size-4 shrink-0 text-primary" />
+          {journeyNote}
+        </li>
+      </ul>
+
+      <div className="mt-10">
+        <h2 className="text-[1.45rem] leading-[1.5] text-foreground">
+          भक्ति, कथा और तीर्थ-दर्शन का पावन संगम
+        </h2>
+        <p className="mt-3 text-base leading-8 text-muted-foreground">
+          {katha.organizers} के तत्वावधान में आयोजित इस दस दिवसीय यात्रा में श्रीमद् भागवत कथा एवं
+          जगन्नाथपुरी और गंगासागर तीर्थ क्षेत्र के दर्शनीय स्थलों का लाभ मिलेगा।
+        </p>
+      </div>
+
+      <div className="mt-8 grid gap-px border border-secondary/60 bg-border">
+        <div className="bg-card px-5 py-6">
+          <p className="text-sm text-muted-foreground">प्रति यात्री मूल किराया</p>
+          <p className="mt-1 font-display text-3xl leading-[1.4] text-primary">
+            {formatRupees(katha.farePerTraveler)}
+          </p>
+        </div>
+        <div className="bg-card px-5 py-6">
+          <p className="text-sm text-muted-foreground">प्रति जोड़ा मूल किराया</p>
+          <p className="mt-1 font-display text-3xl leading-[1.4] text-primary">
+            {formatRupees(katha.farePerCouple)}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-8 flex flex-col gap-3">
+        <AnchorButton href="#katha">कथा विवरण</AnchorButton>
+        <AnchorButton href="#darshan" variant="outline">
+          तीर्थ स्थलों के दर्शन
+        </AnchorButton>
+        <AnchorButton href="#travel" variant="outline">
+          यात्रा व्यवस्था देखें
+        </AnchorButton>
+      </div>
+    </section>
+  );
+}
+
+function KathaSection() {
+  return (
+    <PageSection id="katha" eyebrow="कथा" title="कथा विवरण">
+      <DetailList
+        items={[
+          { label: "कथा", value: katha.title },
+          {
+            label: "कथा व्यास",
+            value: `${katha.speaker}, ${katha.speakerAffiliation}`,
+          },
+          { label: "तिथि", value: `${katha.startDate} – ${katha.endDate} (${katha.durationDays} दिवसीय यात्रा)` },
+          { label: "स्थान", value: katha.location },
+          { label: "आयोजक", value: katha.organizers },
+          { label: "यात्रा मार्ग", value: journeyNote },
+        ]}
+      />
+    </PageSection>
+  );
+}
+
+function ChipList({ items }: { items: readonly string[] }) {
+  return (
+    <ul className="flex flex-wrap gap-2">
+      {items.map((item) => (
+        <li key={item} className="border border-secondary/70 bg-background/60 px-3 py-1 text-sm">
+          {item}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function TravelSection() {
+  return (
+    <PageSection id="travel" eyebrow="यात्रा व्यवस्था" title="यात्रा व्यवस्था">
+      <p className="mb-5 text-center font-display text-lg leading-[1.7] text-primary">
+        {accommodation.route.join(" → ")}
+      </p>
+      <DetailList
+        items={[
+          { label: "पुरी में आवास", value: accommodation.puriHotel },
+          { label: "कमरा व्यवस्था", value: accommodation.roomOccupancy },
+          {
+            label: "पर्सनल (अलग) कमरा",
+            value: `${formatRupees(accommodation.personalRoomSurcharge)} प्रति यात्री अतिरिक्त शुल्क`,
+          },
+          { label: "कोलकाता में विश्राम", value: accommodation.kolkataStay },
+          {
+            label: "ट्रेन किराया",
+            value: (
+              <>
+                <span className="block">{accommodation.trainFare}</span>
+                <span className="mt-3 block">
+                  <ChipList items={accommodation.trainClasses} />
+                </span>
+              </>
+            ),
+          },
+          {
+            label: "यात्रा समिति द्वारा परिवहन",
+            value: <ChipList items={accommodation.committeeTransport} />,
+          },
+          { label: "पुरी में परिवहन", value: accommodation.puriTransport },
+        ]}
+      />
+    </PageSection>
+  );
+}
+
+function GuestList({ guests, title }: { guests: readonly GuestProfile[]; title: string }) {
+  if (guests.length === 0) {
+    return (
+      <EmptyDetails
+        title={title}
+        description="अतिथियों का विवरण उपलब्ध होने पर यहां जोड़ा जाएगा।"
+      />
+    );
+  }
+
+  return (
+    <ul className="grid gap-4">
+      {guests.map((guest) => (
+        <li key={guest.name} className="border border-secondary/60 bg-card/70 p-5 text-center">
+          {guest.image ? (
             <img
-              src={jagannathArtwork.url}
-              alt="भगवान श्री जगन्नाथ का चित्र"
-              className="h-64 w-40 border border-secondary/70 object-cover object-center sm:h-80 sm:w-52"
+              src={guest.image}
+              alt={guest.name}
+              className="mx-auto mb-4 h-40 w-32 border border-secondary object-cover"
               loading="lazy"
               decoding="async"
             />
-          </div>
-          <div className="flex flex-wrap items-center justify-center gap-x-7 gap-y-3 text-sm text-primary-foreground/90">
-            <span className="inline-flex items-center gap-2">
-              <CalendarDays aria-hidden="true" className="size-4 text-secondary" />
-              {katha.startDate} – {katha.endDate}
-            </span>
-            <span className="inline-flex items-center gap-2">
-              <Clock3 aria-hidden="true" className="size-4 text-secondary" />
-              {katha.durationDays} दिवसीय यात्रा
-            </span>
-            <span className="inline-flex items-center gap-2">
-              <MapPin aria-hidden="true" className="size-4 text-secondary" />
-              जयपुर से आरंभ, जयपुर में समापन
-            </span>
-          </div>
-          <Link to="/katha" className="mt-8 inline-flex">
-            <Button className="min-h-11" size="lg">
-              कथा विवरण <ArrowRight aria-hidden="true" />
-            </Button>
-          </Link>
-        </PageWidth>
-      </section>
+          ) : null}
+          <p className="font-display text-xl leading-[1.5] text-foreground">{guest.name}</p>
+          {guest.title ? <p className="mt-1 text-sm text-muted-foreground">{guest.title}</p> : null}
+        </li>
+      ))}
+    </ul>
+  );
+}
 
-      <section className="py-14 sm:py-20">
-        <PageWidth>
-          <div className="mx-auto max-w-4xl text-center">
-            <p className="text-sm font-semibold text-primary">यात्रा का आमंत्रण</p>
-            <OrnamentalDivider />
-            <h2 className="font-display text-2xl leading-tight text-foreground sm:text-4xl">
-              भक्ति, कथा और तीर्थ-दर्शन का पावन संगम
-            </h2>
-            <p className="mt-5 text-base leading-8 text-muted-foreground">
-              {katha.organizers} के तत्वावधान में आयोजित इस दस दिवसीय यात्रा में श्रीमद् भागवत कथा एवं
-              जगन्नाथपुरी और गंगासागर तीर्थ क्षेत्र के दर्शनीय स्थलों का लाभ मिलेगा।
+function PhoneLink({ name, phone }: { name: string; phone: string }) {
+  return (
+    <a
+      href={`tel:${phone}`}
+      className="flex min-h-12 items-center justify-between gap-3 border-b border-border px-5 py-2 last:border-b-0"
+    >
+      <span className="min-w-0 text-base">{name}</span>
+      <span className="inline-flex shrink-0 items-center gap-2 text-sm text-primary">
+        <Phone aria-hidden="true" className="size-4" />
+        {phone}
+      </span>
+    </a>
+  );
+}
+
+function InformationSection() {
+  return (
+    <PageSection id="information" eyebrow="सूचनाएँ" title="आवश्यक नियम व निर्देश">
+      <ol className="space-y-px border border-secondary/60 bg-border">
+        {instructions.map((instruction, index) => (
+          <li key={instruction} className="flex gap-4 bg-card/80 px-5 py-4">
+            <span className="font-display text-xl leading-[1.5] text-primary">{index + 1}.</span>
+            <span className="min-w-0 text-base leading-7">{instruction}</span>
+          </li>
+        ))}
+      </ol>
+
+      <div className="mt-8 border border-secondary/60 bg-card/70">
+        <p className="px-5 pt-4 text-sm leading-7 text-muted-foreground">
+          अपने पूर्वजों की पुण्य स्मृति में श्रीमद्भागवत पाठ पारायण के यजमान बनने हेतु संपर्क
+        </p>
+        <PhoneLink name={yajmanContact.name} phone={yajmanContact.phone} />
+      </div>
+
+      <h3 className="mt-10 text-center text-xl leading-[1.5] text-foreground">संपर्क सूत्र</h3>
+      <div className="mt-4 space-y-4">
+        {contactGroups.map((group) => (
+          <div key={group.region} className="border border-secondary/60 bg-card/70">
+            <p className="border-b border-border px-5 py-2 font-display text-lg leading-[1.5] text-primary">
+              {group.region}
             </p>
+            {group.contacts.map((contact) => (
+              <PhoneLink key={contact.phone} name={contact.name} phone={contact.phone} />
+            ))}
           </div>
+        ))}
+      </div>
 
-          <div className="mt-12 grid gap-px border border-border bg-border sm:grid-cols-2">
-            <div className="bg-card px-6 py-8 text-center sm:px-10">
-              <p className="text-sm text-muted-foreground">प्रति यात्री मूल किराया</p>
-              <p className="mt-2 font-display text-3xl text-primary">₹{katha.farePerTraveler.toLocaleString("en-IN")}/-</p>
-            </div>
-            <div className="bg-card px-6 py-8 text-center sm:px-10">
-              <p className="text-sm text-muted-foreground">प्रति जोड़ा मूल किराया</p>
-              <p className="mt-2 font-display text-3xl text-primary">₹{katha.farePerCouple.toLocaleString("en-IN")}/-</p>
-            </div>
-          </div>
-
-          <div className="mt-12 flex flex-wrap justify-center gap-3">
-            <Link to="/darshan">
-              <Button size="lg" variant="default">
-                तीर्थ स्थलों के दर्शन <ArrowRight aria-hidden="true" />
-              </Button>
-            </Link>
-            <Link to="/travel">
-              <Button size="lg" variant="outline">
-                यात्रा व्यवस्था देखें
-              </Button>
-            </Link>
-          </div>
-        </PageWidth>
-      </section>
-    </>
+      <h3 className="mt-10 text-center text-xl leading-[1.5] text-foreground">वीडियो गैलरी</h3>
+      <div className="mt-4">
+        {videos.length === 0 ? (
+          <EmptyDetails
+            title="वीडियो गैलरी"
+            description="वीडियो उपलब्ध होने पर यहां जोड़े जाएंगे।"
+          />
+        ) : (
+          <ul className="grid gap-3">
+            {videos.map((video) => (
+              <li key={video.url}>
+                <a
+                  href={video.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block overflow-hidden border border-secondary/60 bg-card/70"
+                >
+                  {video.thumbnail ? (
+                    <img
+                      src={video.thumbnail}
+                      alt=""
+                      className="aspect-video w-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  ) : null}
+                  <span className="block px-5 py-3 text-base">{video.title}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </PageSection>
   );
 }
