@@ -2,7 +2,7 @@ import { useState, type ReactNode } from "react";
 import { useSearch } from "@tanstack/react-router";
 import { CalendarDays, Clock3, MapPin, Phone, Sparkles } from "lucide-react";
 
-import jagannathArtwork from "@/assets/divya-yatra/jagannath-artwork.jpg.asset.json";
+import jagannathArtwork from "@/assets/divya-yatra/jagannath-artwork.jpg.asset.jpeg";
 import { DestinationExplorer } from "@/components/destination-explorer";
 import { Button } from "@/components/ui/button";
 import {
@@ -51,7 +51,7 @@ function InvitationCover({
       <main className="flex min-h-svh flex-col items-center justify-center px-7 py-[max(19svh,8.5rem)] text-center">
         <div className="entry-reveal flex w-full flex-col items-center">
           <img
-            src={jagannathArtwork.url}
+            src={jagannathArtwork}
             alt="भगवान श्री जगन्नाथ का चित्र"
             className="mb-3 h-28 w-20 border border-secondary object-cover object-center shadow-md"
             fetchPriority="high"
@@ -123,7 +123,7 @@ function InviteSection() {
       <p className="mt-2 text-base leading-7 text-foreground">{katha.location}</p>
 
       <img
-        src={jagannathArtwork.url}
+        src={jagannathArtwork}
         alt="भगवान श्री जगन्नाथ का चित्र"
         className="mx-auto my-6 h-56 w-36 border border-secondary object-cover object-center shadow-md"
         loading="lazy"
