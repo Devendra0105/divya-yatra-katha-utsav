@@ -30,6 +30,8 @@
  */
 
 @theme inline {
+  --font-display: "Yatra One", "Tiro Devanagari Hindi", "Noto Serif Devanagari", serif;
+  --font-body: "Tiro Devanagari Hindi", "Noto Serif Devanagari", "Mukta", serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -73,26 +75,27 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
+  --radius: 0.375rem;
+  /* Background peach is sampled from the supplied mandala image so the bands blend seamlessly. */
+  --background: oklch(0.902 0.069 68.2);
+  --foreground: oklch(0.24 0.06 30);
+  --card: oklch(0.985 0.02 80);
+  --card-foreground: oklch(0.24 0.06 30);
+  --popover: oklch(0.985 0.02 80);
+  --popover-foreground: oklch(0.24 0.06 30);
+  --primary: oklch(0.33 0.12 25);
+  --primary-foreground: oklch(0.97 0.02 85);
+  --secondary: oklch(0.62 0.11 80);
+  --secondary-foreground: oklch(0.24 0.06 30);
+  --muted: oklch(0.93 0.04 70);
+  --muted-foreground: oklch(0.4 0.05 40);
+  --accent: oklch(0.86 0.08 75);
+  --accent-foreground: oklch(0.24 0.06 30);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --border: oklch(0.62 0.11 80 / 55%);
+  --input: oklch(0.62 0.11 80 / 55%);
+  --ring: oklch(0.33 0.12 25);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -149,8 +152,509 @@
     border-color: var(--color-border);
   }
 
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
-    background-color: var(--color-background);
+    margin: 0;
+    background-color: var(--desk);
     color: var(--color-foreground);
+    font-family: var(--font-body);
+    line-height: 1.7;
+    overflow-x: hidden;
+    overflow-wrap: break-word;
+  }
+
+  /* Yatra One has a single weight: never let the browser fake a bold. */
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: var(--font-display);
+    font-weight: 400;
+  }
+}
+
+/*
+ * Mobile-only shell: the invitation is always a single phone-sized column (max 430px).
+ * On laptops the column stays centred on a neutral backdrop; there is no desktop layout.
+ */
+:root {
+  --shell-w: min(100vw, 430px);
+  --desk: oklch(0.93 0.004 80);
+}
+
+.phone-shell {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  min-height: 100svh;
+  margin-inline: auto;
+  overflow-x: hidden;
+  overflow-x: clip;
+  background-color: var(--background);
+  box-shadow: 0 0 48px oklch(0 0 0 / 0.14);
+}
+
+/* Ornament bands of the supplied background: top and bottom of the whole page only. */
+.phone-shell--ornamented {
+  background-image: url("/bg-top.jpg"), url("/bg-bottom.jpg");
+  background-repeat: no-repeat;
+  background-position:
+    center top,
+    center bottom;
+  background-size: 100% auto;
+}
+
+/* Cover: the supplied background image, unmodified, filling the phone screen. */
+.invitation-cover {
+  background-image: url("/background.jpg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+/* Keeps content clear of the ornaments (band images are 0.5 x the shell width tall). */
+.band-top {
+  padding-top: calc(var(--shell-w) * 0.42);
+}
+
+.band-bottom {
+  padding-bottom: calc(var(--shell-w) * 0.46 + env(safe-area-inset-bottom, 0px));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+}
+
+/* ------------------------------------------------------------------ */
+/* Royal motion layer (transform/opacity only, so it stays smooth)     */
+/* ------------------------------------------------------------------ */
+
+:root {
+  --gold-bright: oklch(0.78 0.15 80);
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* Scroll-reveal */
+[data-reveal] {
+  opacity: 0;
+  transition:
+    opacity 0.9s var(--ease-out) var(--d, 0ms),
+    transform 0.9s var(--ease-out) var(--d, 0ms);
+}
+[data-reveal="up"] {
+  transform: translateY(32px);
+}
+[data-reveal="left"] {
+  transform: translateX(-34px);
+}
+[data-reveal="right"] {
+  transform: translateX(34px);
+}
+[data-reveal="zoom"] {
+  transform: scale(0.9);
+}
+[data-reveal][data-seen="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Photos settle in with a slow zoom once their card is revealed */
+[data-reveal] .kenburns {
+  transform: scale(1.18);
+  transition: transform 2.2s var(--ease-out);
+}
+[data-reveal][data-seen="true"] .kenburns {
+  transform: scale(1);
+}
+
+/* Premium double-line card */
+.royal-card {
+  border: 1px solid var(--secondary);
+  outline: 1px solid color-mix(in oklab, var(--secondary) 45%, transparent);
+  outline-offset: -5px;
+  background: color-mix(in oklab, var(--card) 80%, transparent);
+  box-shadow: 0 14px 30px -20px oklch(0.33 0.12 25 / 0.55);
+}
+
+.press {
+  transition: transform 0.2s var(--ease-out);
+}
+.press:active {
+  transform: scale(0.97);
+}
+
+/* Gold sheen travelling across headings */
+.sheen-text {
+  background-image: linear-gradient(
+    100deg,
+    var(--primary) 0%,
+    var(--primary) 40%,
+    oklch(0.7 0.18 62) 50%,
+    var(--primary) 60%,
+    var(--primary) 100%
+  );
+  background-size: 260% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: sheen 6s ease-in-out infinite;
+}
+@keyframes sheen {
+  0% {
+    background-position: 125% 0;
+  }
+  100% {
+    background-position: -25% 0;
+  }
+}
+
+/* Arched temple-window frame for the deity artwork */
+.arch {
+  position: relative;
+  overflow: hidden;
+  border-radius: 999px 999px 8px 8px;
+  border: 2px solid var(--secondary);
+  box-shadow:
+    0 0 0 4px var(--background),
+    0 0 0 5px color-mix(in oklab, var(--secondary) 80%, transparent),
+    0 22px 40px -18px oklch(0.33 0.12 25 / 0.6);
+}
+.arch::after,
+.btn-royal::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 35%, oklch(1 0 0 / 0.55) 50%, transparent 65%);
+  transform: translateX(-130%);
+  animation: sweep 4.5s ease-in-out 1.2s infinite;
+  pointer-events: none;
+}
+.btn-royal {
+  position: relative;
+  overflow: hidden;
+}
+@keyframes sweep {
+  0%,
+  55% {
+    transform: translateX(-130%);
+  }
+  100% {
+    transform: translateX(130%);
+  }
+}
+
+/* Soft breathing glow ring on the main call-to-action */
+.pulse-ring {
+  animation: pulse-ring 2.4s ease-out infinite;
+}
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 oklch(0.62 0.11 80 / 0.55);
+  }
+  100% {
+    box-shadow: 0 0 0 18px oklch(0.62 0.11 80 / 0);
+  }
+}
+
+/* Mandala halo */
+.halo {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.halo::before {
+  content: "";
+  position: absolute;
+  width: 150%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, oklch(0.9 0.12 85 / 0.8) 0%, transparent 62%);
+  animation: breathe 5s ease-in-out infinite;
+}
+.mandala-halo {
+  position: absolute;
+  width: 210%;
+  max-width: none;
+  aspect-ratio: 1;
+  color: var(--secondary);
+  opacity: 0.85;
+  pointer-events: none;
+}
+.halo .mandala-halo.halo-wide {
+  width: 320%;
+}
+.spin-slow {
+  transform-box: view-box;
+  transform-origin: center;
+  animation: spin 70s linear infinite;
+}
+.spin-slow-reverse {
+  transform-box: view-box;
+  transform-origin: center;
+  animation: spin 55s linear infinite reverse;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+}
+
+/* Falling petals / rising sparks */
+.petal,
+.spark {
+  position: absolute;
+  top: 0;
+  will-change: transform;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+.petal {
+  border-radius: 0 100% 0 100%;
+  background: linear-gradient(135deg, oklch(0.75 0.17 60), oklch(0.62 0.2 38));
+  opacity: 0.75;
+  animation-name: petal-fall;
+}
+.spark {
+  border-radius: 50%;
+  background: var(--gold-bright);
+  box-shadow: 0 0 6px 1px oklch(0.85 0.15 85 / 0.8);
+  animation-name: spark-rise;
+}
+@keyframes petal-fall {
+  0% {
+    transform: translate3d(0, -12vh, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(var(--drift), 50vh, 0) rotate(200deg);
+  }
+  100% {
+    transform: translate3d(calc(var(--drift) * -0.4), 108vh, 0) rotate(420deg);
+  }
+}
+@keyframes spark-rise {
+  0% {
+    transform: translate3d(0, 105vh, 0) scale(0.6);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--drift), -8vh, 0) scale(1.1);
+    opacity: 0;
+  }
+}
+
+/* Ornamental divider draws itself */
+.orn span {
+  transform: scaleX(0);
+  transition: transform 1s var(--ease-out) 0.15s;
+}
+.orn span:first-child {
+  transform-origin: right;
+}
+.orn span:last-child {
+  transform-origin: left;
+}
+.orn svg {
+  opacity: 0;
+  transform: scale(0.4) rotate(-120deg);
+  transition:
+    transform 1s var(--ease-out),
+    opacity 0.6s ease;
+}
+.orn[data-seen="true"] span {
+  transform: scaleX(1);
+}
+.orn[data-seen="true"] svg {
+  opacity: 1;
+  transform: none;
+}
+
+/* Journey route: the line draws and a glowing marker travels down it */
+.route {
+  position: relative;
+  padding-left: 3.25rem;
+}
+.route::before {
+  content: "";
+  position: absolute;
+  left: 1.2rem;
+  top: 1.25rem;
+  bottom: 1.25rem;
+  width: 2px;
+  background: linear-gradient(var(--secondary), var(--primary));
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 2.4s ease-in-out 0.3s;
+}
+.route[data-seen="true"]::before {
+  transform: scaleY(1);
+}
+.route__marker {
+  position: absolute;
+  left: calc(1.2rem - 6px);
+  top: 1.25rem;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--gold-bright);
+  box-shadow: 0 0 14px 4px oklch(0.85 0.15 85 / 0.9);
+  opacity: 0;
+}
+.route[data-seen="true"] .route__marker {
+  animation: travel 2.4s ease-in-out 0.3s forwards;
+}
+@keyframes travel {
+  0% {
+    opacity: 1;
+    top: 1.25rem;
+  }
+  92% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    top: calc(100% - 1.25rem - 14px);
+  }
+}
+.route__stop {
+  position: relative;
+  opacity: 0;
+  transform: translateX(18px);
+  transition:
+    opacity 0.7s var(--ease-out),
+    transform 0.7s var(--ease-out);
+  transition-delay: calc(0.3s + var(--i, 0) * 0.7s);
+}
+.route[data-seen="true"] .route__stop {
+  opacity: 1;
+  transform: none;
+}
+.route__node {
+  position: absolute;
+  left: -3.05rem;
+  top: 50%;
+  translate: 0 -50%;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: 1px solid var(--secondary);
+  background: var(--card);
+  color: var(--primary);
+}
+
+/* Scroll progress line */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  z-index: 40;
+  width: var(--shell-w);
+  height: 3px;
+  translate: -50% 0;
+  pointer-events: none;
+}
+.scroll-progress__bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--secondary), var(--gold-bright), var(--primary));
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+/* Cover -> invitation: a lotus-gold bloom opens the page from the button */
+.bloom-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  overflow: hidden;
+  background: var(--desk);
+  animation: bloom 1.15s cubic-bezier(0.6, 0.05, 0.2, 1) both;
+}
+@keyframes bloom {
+  from {
+    clip-path: circle(0% at 50% 74%);
+  }
+  to {
+    clip-path: circle(150% at 50% 74%);
+  }
+}
+.bloom-flash {
+  position: fixed;
+  left: 50%;
+  top: 74%;
+  z-index: 60;
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
+  border-radius: 50%;
+  background: radial-gradient(circle, oklch(0.9 0.15 85) 0%, oklch(0.75 0.15 70 / 0.6) 45%, transparent 70%);
+  pointer-events: none;
+  animation: bloom-flash 1.15s ease-out both;
+}
+@keyframes bloom-flash {
+  from {
+    transform: scale(0.4);
+    opacity: 1;
+  }
+  to {
+    transform: scale(40);
+    opacity: 0;
+  }
+}
+
+/* Staggered entrance used on the cover (pure CSS, so it plays before hydration) */
+.rise {
+  opacity: 0;
+  animation: rise 0.9s var(--ease-out) var(--d, 0ms) both;
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+  .petal,
+  .spark {
+    display: none;
   }
 }
