@@ -1,3 +1,5 @@
+import bali from "assets\katha\rishabhdev.jpg"
+
 export type KathaDay = {
   dayNumber: number;
   dayLabel: string;
@@ -10,7 +12,7 @@ export type KathaDay = {
   illustrationAlt: string;
   illustrationPlaceholder: string;
 };
-
+import ap from "@/assets/divya-yatra/ap.png"
 /**
  * Global header emblem for Shree Akshar Purushottam Maharaj.
  * Leave `src` undefined until the verified PNG asset is added under `src/assets/divya-yatra/`.
@@ -20,7 +22,7 @@ export const aksharPurushottamBanner: {
   alt: string;
   title: string;
 } = {
-  src: undefined,
+  src: ap,
   alt: "श्री अक्षर पुरुषोत्तम महाराज",
   title: "श्री अक्षर पुरुषोत्तम महाराज",
 };
