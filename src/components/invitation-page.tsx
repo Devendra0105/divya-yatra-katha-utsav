@@ -1,16 +1,16 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useSearch } from "@tanstack/react-router";
-import { CalendarDays, Clock3, MapPin, Phone, Sparkles } from "lucide-react";
+import { CalendarDays, Clock3, Flower2, MapPin, Phone } from "lucide-react";
 
 import jagannathArtwork from "@/assets/divya-yatra/jagannath-artwork.jpg.asset.jpeg";
 import { DestinationExplorer } from "@/components/destination-explorer";
+import { InvitationCover } from "@/components/invitation-cover";
 import { Button } from "@/components/ui/button";
 import {
   DetailList,
   EmptyDetails,
   OrnamentalDivider,
   PageSection,
-  PhoneShell,
   SiteFrame,
 } from "@/components/site-chrome";
 import { accommodation } from "@/data/accommodation";
@@ -18,7 +18,9 @@ import { chiefGuests, distinguishedGuests, type GuestProfile } from "@/data/gues
 import { contactGroups, instructions, yajmanContact } from "@/data/instructions";
 import { katha } from "@/data/katha";
 import { videos } from "@/data/videos";
+import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { sanitizeInviteeName } from "@/lib/invitation";
+import { cssVars } from "@/lib/utils";
 
 const formatRupees = (amount: number) => `₹${amount.toLocaleString("en-IN")}/-`;
 const journeyNote = "जयपुर से आरंभ, जयपुर में समापन";
@@ -29,52 +31,21 @@ export function InvitationPage() {
   const guestName = sanitizeInviteeName(search["to"]);
 
   if (!opened) {
-    return <InvitationCover guestName={guestName} onOpen={() => setOpened(true)} />;
+    return (
+      <InvitationCover
+        guestName={guestName}
+        onOpened={() => {
+          window.scrollTo(0, 0);
+          setOpened(true);
+        }}
+      />
+    );
   }
 
   return (
     <SiteFrame>
       <InvitationContent />
     </SiteFrame>
-  );
-}
-
-function InvitationCover({
-  guestName,
-  onOpen,
-}: {
-  guestName: string | undefined;
-  onOpen: () => void;
-}) {
-  return (
-    <PhoneShell className="invitation-cover">
-      <main className="flex min-h-svh flex-col items-center justify-center px-7 py-[max(19svh,8.5rem)] text-center">
-        <div className="entry-reveal flex w-full flex-col items-center">
-          <img
-            src={jagannathArtwork}
-            alt="भगवान श्री जगन्नाथ का चित्र"
-            className="mb-3 h-28 w-20 border border-secondary object-cover object-center shadow-md"
-            fetchPriority="high"
-          />
-          <p className="text-sm text-primary">{katha.organizers}</p>
-          <OrnamentalDivider />
-          <p className="text-sm text-muted-foreground">सप्रेम आमंत्रण</p>
-          <h1 className="mt-1 text-[1.65rem] leading-[1.5] text-primary">{katha.title}</h1>
-          <p className="mt-2 font-display text-xl leading-[1.5] text-foreground">
-            {guestName ? `आदरणीय ${guestName} जी` : "आप सादर आमंत्रित हैं"}
-          </p>
-          <p className="mt-1 text-sm leading-6 text-foreground/85">{katha.location}</p>
-          <p className="text-sm text-muted-foreground">
-            {katha.startDate} से {katha.endDate}
-          </p>
-          <Button className="mt-5 min-h-12 px-8" onClick={onOpen} size="lg">
-            <Sparkles aria-hidden="true" />
-            निमंत्रण खोलें
-          </Button>
-          <p className="mt-3 text-xs text-muted-foreground">शुभारंभ हेतु स्पर्श करें</p>
-        </div>
-      </main>
-    </PhoneShell>
   );
 }
 
@@ -95,11 +66,16 @@ function AnchorButton({
 }
 
 function InvitationContent() {
+  useScrollReveal();
+  useEffect(() => {
+    document.getElementById("invite")?.focus({ preventScroll: true });
+  }, []);
+
   return (
     <>
       <InviteSection />
       <KathaSection />
-      <PageSection id="darshan" eyebrow="दर्शन" title="तीर्थ स्थलों के दर्शन">
+      <PageSection id="darshan" eyebrow="दर्शन" title="तीर्थ स्थलों के दर्शन" revealBody={false}>
         <DestinationExplorer />
       </PageSection>
       <TravelSection />
@@ -116,20 +92,25 @@ function InvitationContent() {
 
 function InviteSection() {
   return (
-    <section id="invite" className="band-top px-5 pb-10 text-center">
+    <section id="invite" tabIndex={-1} className="band-top px-5 pb-10 text-center outline-none">
       <p className="font-display text-base text-primary">सप्रेम आमंत्रण</p>
       <OrnamentalDivider />
       <h1 className="text-[1.9rem] leading-[1.5] text-primary">{katha.title}</h1>
       <p className="mt-2 text-base leading-7 text-foreground">{katha.location}</p>
 
-      <img
-        src={jagannathArtwork}
-        alt="भगवान श्री जगन्नाथ का चित्र"
-        className="mx-auto my-6 h-56 w-36 border border-secondary object-cover object-center shadow-md"
-        loading="lazy"
-        decoding="async"
-    
-      />
+      <div className="my-8" data-reveal="zoom">
+        <div className="arch mx-auto aspect-[5/4] w-full max-w-[19rem]">
+          <div className="kenburns h-full w-full">
+            <img
+              src={jagannathArtwork}
+              alt="भगवान श्री जगन्नाथ का चित्र"
+              className="h-full w-full scale-[1.06] object-cover object-center"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+        </div>
+      </div>
 
       <ul className="space-y-3 text-sm text-foreground">
         <li className="flex items-center justify-center gap-2">
@@ -156,14 +137,14 @@ function InviteSection() {
         </p>
       </div>
 
-      <div className="mt-8 grid gap-px border border-secondary/60 bg-border">
-        <div className="bg-card px-5 py-6">
+      <div className="mt-8 grid gap-4">
+        <div className="royal-card px-5 py-6" data-reveal="zoom">
           <p className="text-sm text-muted-foreground">प्रति यात्री मूल किराया</p>
           <p className="mt-1 font-display text-3xl leading-[1.4] text-primary">
             {formatRupees(katha.farePerTraveler)}
           </p>
         </div>
-        <div className="bg-card px-5 py-6">
+        <div className="royal-card px-5 py-6" data-reveal="zoom" style={cssVars({ "--d": "120ms" })}>
           <p className="text-sm text-muted-foreground">प्रति जोड़ा मूल किराया</p>
           <p className="mt-1 font-display text-3xl leading-[1.4] text-primary">
             {formatRupees(katha.farePerCouple)}
@@ -219,9 +200,21 @@ function ChipList({ items }: { items: readonly string[] }) {
 function TravelSection() {
   return (
     <PageSection id="travel" eyebrow="यात्रा व्यवस्था" title="यात्रा व्यवस्था">
-      <p className="mb-5 text-center font-display text-lg leading-[1.7] text-primary">
-        {accommodation.route.join(" → ")}
-      </p>
+      <ol className="route mb-8" data-observe="" aria-label={accommodation.route.join(" → ")}>
+        <li className="route__marker" aria-hidden="true" />
+        {accommodation.route.map((stop, index) => (
+          <li
+            key={`${stop}-${index}`}
+            className="route__stop royal-card mb-4 px-5 py-3 font-display text-xl leading-[1.5] text-primary last:mb-0"
+            style={cssVars({ "--i": index })}
+          >
+            <span className="route__node" aria-hidden="true">
+              <Flower2 className="size-4" strokeWidth={1.6} />
+            </span>
+            {stop}
+          </li>
+        ))}
+      </ol>
       <DetailList
         items={[
           { label: "पुरी में आवास", value: accommodation.puriHotel },
@@ -266,7 +259,7 @@ function GuestList({ guests, title }: { guests: readonly GuestProfile[]; title: 
   return (
     <ul className="grid gap-4">
       {guests.map((guest) => (
-        <li key={guest.name} className="border border-secondary/60 bg-card/70 p-5 text-center">
+        <li key={guest.name} className="royal-card p-5 text-center">
           {guest.image ? (
             <img
               src={guest.image}
@@ -311,7 +304,7 @@ function InformationSection() {
         ))}
       </ol>
 
-      <div className="mt-8 border border-secondary/60 bg-card/70">
+      <div className="royal-card mt-8">
         <p className="px-5 pt-4 text-sm leading-7 text-muted-foreground">
           अपने पूर्वजों की पुण्य स्मृति में श्रीमद्भागवत पाठ पारायण के यजमान बनने हेतु संपर्क
         </p>
@@ -321,7 +314,7 @@ function InformationSection() {
       <h3 className="mt-10 text-center text-xl leading-[1.5] text-foreground">संपर्क सूत्र</h3>
       <div className="mt-4 space-y-4">
         {contactGroups.map((group) => (
-          <div key={group.region} className="border border-secondary/60 bg-card/70">
+          <div key={group.region} className="royal-card">
             <p className="border-b border-border px-5 py-2 font-display text-lg leading-[1.5] text-primary">
               {group.region}
             </p>
@@ -347,7 +340,7 @@ function InformationSection() {
                   href={video.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="block overflow-hidden border border-secondary/60 bg-card/70"
+                  className="royal-card block overflow-hidden"
                 >
                   {video.thumbnail ? (
                     <img
