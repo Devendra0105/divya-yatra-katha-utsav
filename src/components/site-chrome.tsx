@@ -123,3 +123,4 @@ export function DetailList({ items }: { items: readonly { label: string; value: 
     </dl>
   );
 }
+

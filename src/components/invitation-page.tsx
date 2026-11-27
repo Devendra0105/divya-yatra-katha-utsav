@@ -249,7 +249,8 @@ function KathaDayCard({ day, imageLeft }: { day: KathaDay; imageLeft: boolean })
             <img
               src={day.illustration}
               alt={day.illustrationAlt}
-              className="mx-auto max-h-48 w-auto max-w-full object-contain drop-shadow-md transition-transform duration-500 hover:scale-[1.03]"
+          
+              className="w-full max-w-[380px] md:max-w-[460px] object-contain drop-shadow-md transition-transform duration-500 hover:scale-[1.03]"
               loading="lazy"
               decoding="async"
             />
