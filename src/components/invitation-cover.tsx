@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Flower2, Sparkles } from "lucide-react";
 
 import jagannathArtwork from "@/assets/divya-yatra/jagannath-artwork.jpg.asset.jpeg";
+import { AksharHeader } from "@/components/site-chrome";
 import { Button } from "@/components/ui/button";
 import { katha } from "@/data/katha";
 import { cssVars } from "@/lib/utils";
@@ -88,8 +89,12 @@ export function InvitationCover({
         ))}
       </div>
 
-      <main className="relative flex min-h-svh flex-col items-center justify-center px-7 py-[max(7svh,2.5rem)] text-center">
-        <p className="rise text-sm text-primary" style={stagger(80)}>
+      <main className="relative flex min-h-svh flex-col items-center justify-center px-7 py-[max(6svh,2rem)] text-center">
+        <div className="rise" style={stagger(40)}>
+          <AksharHeader />
+        </div>
+
+        <p className="rise text-sm text-primary" style={stagger(120)}>
           {katha.organizers}
         </p>
 
@@ -116,11 +121,8 @@ export function InvitationCover({
           </div>
         </div>
 
-        <p className="rise mt-6 text-sm text-muted-foreground" style={stagger(420)}>
-          सप्रेम आमंत्रण
-        </p>
-        <div className="rise" style={stagger(520)}>
-          <h1 className="sheen-text mt-1 text-[1.75rem] leading-[1.5]">{katha.title}</h1>
+        <div className="rise mt-6" style={stagger(460)}>
+          <h1 className="sheen-text text-[1.75rem] leading-[1.5]">{katha.title}</h1>
         </div>
         <p className="rise mt-1 font-display text-xl leading-[1.5] text-foreground" style={stagger(640)}>
           {guestName ? `आदरणीय ${guestName} जी` : "आप सादर आमंत्रित हैं"}

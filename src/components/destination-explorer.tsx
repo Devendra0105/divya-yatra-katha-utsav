@@ -60,9 +60,11 @@ export function DestinationExplorer() {
             <p className="chapter-count">{chapter.scenes.length} दर्शन स्थल</p>
             <span className="chapter-rule" aria-hidden="true" />
           </div>
-          {chapter.scenes.map((scene) => (
-            <DestinationScene key={scene.destination.id} scene={scene} />
-          ))}
+          <div className="chapter-grid">
+            {chapter.scenes.map((scene) => (
+              <DestinationScene key={scene.destination.id} scene={scene} />
+            ))}
+          </div>
         </section>
       ))}
     </div>

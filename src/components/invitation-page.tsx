@@ -1,12 +1,13 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useSearch } from "@tanstack/react-router";
-import { CalendarDays, Clock3, Flower2, MapPin, Phone } from "lucide-react";
+import { BookOpenText, CalendarDays, Clock3, Flower2, MapPin, Phone, Users } from "lucide-react";
 
 import jagannathArtwork from "@/assets/divya-yatra/jagannath-artwork.jpg.asset.jpeg";
 import { DestinationExplorer } from "@/components/destination-explorer";
 import { InvitationCover } from "@/components/invitation-cover";
 import { Button } from "@/components/ui/button";
 import {
+  AksharHeader,
   DetailList,
   EmptyDetails,
   OrnamentalDivider,
@@ -14,20 +15,19 @@ import {
   SiteFrame,
 } from "@/components/site-chrome";
 import { accommodation } from "@/data/accommodation";
-import { chiefGuests, distinguishedGuests, type GuestProfile } from "@/data/guests";
+import { chiefYajmans, distinguishedYajmans, type YajmanProfile } from "@/data/guests";
 import { contactGroups, instructions, yajmanContact } from "@/data/instructions";
-import { katha } from "@/data/katha";
+import { katha, kathaSchedule, type KathaDay } from "@/data/katha";
 import { videos } from "@/data/videos";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { sanitizeInviteeName } from "@/lib/invitation";
 import { cssVars } from "@/lib/utils";
 
-const formatRupees = (amount: number) => `₹${amount.toLocaleString("en-IN")}/-`;
 const journeyNote = "जयपुर से आरंभ, जयपुर में समापन";
 
 export function InvitationPage() {
   const [opened, setOpened] = useState(false);
-  const search = useSearch({ strict: false });
+  const search = useSearch({ strict: false }) as Record<string, unknown>;
   const guestName = sanitizeInviteeName(search["to"]);
 
   if (!opened) {
@@ -59,7 +59,7 @@ function AnchorButton({
   children: ReactNode;
 }) {
   return (
-    <Button asChild className="h-auto min-h-12 w-full whitespace-normal py-2" variant={variant}>
+    <Button asChild className="press h-auto min-h-12 w-full whitespace-normal py-2" variant={variant}>
       <a href={href}>{children}</a>
     </Button>
   );
@@ -79,11 +79,11 @@ function InvitationContent() {
         <DestinationExplorer />
       </PageSection>
       <TravelSection />
-      <PageSection id="chief-guests" eyebrow="अतिथि" title="मुख्य अतिथि">
-        <GuestList guests={chiefGuests} title="मुख्य अतिथि" />
+      <PageSection id="chief-yajmans" eyebrow="यजमान" title="मुख्य यजमान">
+        <YajmanList yajmans={chiefYajmans} title="मुख्य यजमान" variant="chief" />
       </PageSection>
-      <PageSection id="distinguished-guests" eyebrow="अतिथि" title="विशिष्ट अतिथि">
-        <GuestList guests={distinguishedGuests} title="विशिष्ट अतिथि" />
+      <PageSection id="distinguished-yajmans" eyebrow="यजमान" title="विशिष्ट यजमान">
+        <YajmanList yajmans={distinguishedYajmans} title="विशिष्ट यजमान" variant="regular" />
       </PageSection>
       <InformationSection />
     </>
@@ -92,10 +92,10 @@ function InvitationContent() {
 
 function InviteSection() {
   return (
-    <section id="invite" tabIndex={-1} className="band-top px-5 pb-10 text-center outline-none">
-      <p className="font-display text-base text-primary">सप्रेम आमंत्रण</p>
+    <section id="invite" tabIndex={-1} className="band-top page-enter px-5 pb-10 text-center outline-none sm:px-7">
+      <AksharHeader />
       <OrnamentalDivider />
-      <h1 className="text-[1.9rem] leading-[1.5] text-primary">{katha.title}</h1>
+      <h1 className="sheen-text text-[1.9rem] leading-[1.5] text-primary sm:text-[2.15rem]">{katha.title}</h1>
       <p className="mt-2 text-base leading-7 text-foreground">{katha.location}</p>
 
       <div className="my-8" data-reveal="zoom">
@@ -112,7 +112,7 @@ function InviteSection() {
         </div>
       </div>
 
-      <ul className="space-y-3 text-sm text-foreground">
+      <ul className="space-y-3 text-sm text-foreground sm:flex sm:flex-wrap sm:justify-center sm:gap-6 sm:space-y-0">
         <li className="flex items-center justify-center gap-2">
           <CalendarDays aria-hidden="true" className="size-4 shrink-0 text-primary" />
           {katha.startDate} – {katha.endDate}
@@ -127,7 +127,7 @@ function InviteSection() {
         </li>
       </ul>
 
-      <div className="mt-10">
+      <div className="mt-10" data-reveal="up">
         <h2 className="text-[1.45rem] leading-[1.5] text-foreground">
           भक्ति, कथा और तीर्थ-दर्शन का पावन संगम
         </h2>
@@ -137,22 +137,9 @@ function InviteSection() {
         </p>
       </div>
 
-      <div className="mt-8 grid gap-4">
-        <div className="royal-card px-5 py-6" data-reveal="zoom">
-          <p className="text-sm text-muted-foreground">प्रति यात्री मूल किराया</p>
-          <p className="mt-1 font-display text-3xl leading-[1.4] text-primary">
-            {formatRupees(katha.farePerTraveler)}
-          </p>
-        </div>
-        <div className="royal-card px-5 py-6" data-reveal="zoom" style={cssVars({ "--d": "120ms" })}>
-          <p className="text-sm text-muted-foreground">प्रति जोड़ा मूल किराया</p>
-          <p className="mt-1 font-display text-3xl leading-[1.4] text-primary">
-            {formatRupees(katha.farePerCouple)}
-          </p>
-        </div>
-      </div>
+      <InvitatorsCard />
 
-      <div className="mt-8 flex flex-col gap-3">
+      <div className="mt-8 flex flex-col gap-3 sm:mx-auto sm:max-w-md">
         <AnchorButton href="#katha">कथा विवरण</AnchorButton>
         <AnchorButton href="#darshan" variant="outline">
           तीर्थ स्थलों के दर्शन
@@ -165,23 +152,166 @@ function InviteSection() {
   );
 }
 
+function InvitatorsCard() {
+  return (
+    <div className="royal-card mt-8 px-5 py-6 text-center" data-reveal="up">
+      <div className="inline-flex items-center justify-center gap-2 text-primary">
+        <Users aria-hidden="true" className="size-4 shrink-0" />
+        <h3 className="text-lg leading-[1.5]">आमंत्रणकर्ता एवं निवेदक</h3>
+      </div>
+      <p className="mt-1 text-xs text-muted-foreground">{katha.organizers}</p>
+
+      <div className="mt-5 grid gap-4 text-left sm:grid-cols-3">
+        {contactGroups.map((group) => (
+          <div
+            key={group.region}
+            className="border border-secondary/50 bg-background/55 px-4 py-3 text-center"
+          >
+            <p className="border-b border-border pb-1.5 font-display text-sm text-primary">
+              {group.region}
+            </p>
+            <ul className="mt-2.5 space-y-1.5">
+              {group.contacts.map((person) => (
+                <li key={person.phone} className="text-base leading-6 text-foreground">
+                  {person.name}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function KathaSection() {
   return (
-    <PageSection id="katha" eyebrow="कथा" title="कथा विवरण">
-      <DetailList
-        items={[
-          { label: "कथा", value: katha.title },
-          {
-            label: "कथा व्यास",
-            value: `${katha.speaker}, ${katha.speakerAffiliation}`,
-          },
-          { label: "तिथि", value: `${katha.startDate} – ${katha.endDate} (${katha.durationDays} दिवसीय यात्रा)` },
-          { label: "स्थान", value: katha.location },
-          { label: "आयोजक", value: katha.organizers },
-          { label: "यात्रा मार्ग", value: journeyNote },
-        ]}
-      />
+    <PageSection id="katha" eyebrow="कथा" title="कथा विवरण" revealBody={false}>
+      <div data-reveal="up">
+        <DetailList
+          items={[
+            { label: "कथा", value: katha.title },
+            {
+              label: "कथा व्यास",
+              value: `${katha.speaker}, ${katha.speakerAffiliation}`,
+            },
+            {
+              label: "यात्रा तिथि",
+              value: `${katha.startDate} – ${katha.endDate} (${katha.durationDays} दिवसीय यात्रा)`,
+            },
+            { label: "कथा आरंभ", value: `${katha.kathaStartDate} (${katha.dailyDurationNote})` },
+            { label: "स्थान", value: katha.location },
+            { label: "आयोजक", value: katha.organizers },
+            { label: "यात्रा मार्ग", value: journeyNote },
+          ]}
+        />
+      </div>
+
+      <div className="mt-10">
+        <div className="text-center" data-reveal="up">
+          <p className="font-display text-sm tracking-wide text-primary">दैनिक कथा क्रम</p>
+          <h3 className="mt-1 text-2xl leading-[1.5] text-foreground">
+            दिवस-वार श्रीमद् भागवत कथा कार्यक्रम
+          </h3>
+          <p className="mt-1 text-sm text-muted-foreground">{katha.dailyDurationNote}</p>
+        </div>
+
+        <div className="mt-6 space-y-6">
+          {kathaSchedule.map((day, index) => (
+            <KathaDayCard key={day.dayNumber} day={day} imageLeft={index % 2 === 0} />
+          ))}
+        </div>
+      </div>
     </PageSection>
+  );
+}
+
+function KathaDayCard({ day, imageLeft }: { day: KathaDay; imageLeft: boolean }) {
+  return (
+    <article
+      className="royal-card katha-day overflow-hidden"
+      data-reveal={imageLeft ? "left" : "right"}
+      aria-label={`${day.dayLabel} — ${day.date}`}
+    >
+      <div
+        className={`grid items-stretch gap-0 md:grid-cols-12 ${
+          imageLeft ? "" : "katha-day--reversed"
+        }`}
+      >
+        <div
+          className={`katha-day__media flex flex-col items-center justify-center border-b border-secondary/40 p-5 md:col-span-5 md:border-b-0 ${
+            imageLeft
+              ? "md:order-1 md:border-r"
+              : "md:order-2 md:border-l"
+          }`}
+        >
+          {day.illustration ? (
+            <img
+              src={day.illustration}
+              alt={day.illustrationAlt}
+              className="mx-auto max-h-48 w-auto max-w-full object-contain drop-shadow-md transition-transform duration-500 hover:scale-[1.03]"
+              loading="lazy"
+              decoding="async"
+            />
+          ) : (
+            <div className="flex w-full max-w-[14rem] flex-col items-center justify-center rounded-sm border border-dashed border-secondary/75 bg-card/70 px-4 py-6 text-center">
+              <BookOpenText aria-hidden="true" className="size-9 text-primary/80" strokeWidth={1.3} />
+              <p className="mt-3 font-display text-sm leading-6 text-primary">
+                {day.illustrationPlaceholder}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">चित्र उपलब्ध होने पर जोड़ा जाएगा</p>
+            </div>
+          )}
+        </div>
+
+        <div
+          className={`flex flex-col justify-between p-5 sm:p-6 md:col-span-7 ${
+            imageLeft ? "md:order-2" : "md:order-1"
+          }`}
+        >
+          <div>
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
+              <span className="inline-flex items-center gap-1.5 border border-secondary/75 bg-primary/10 px-3 py-0.5 font-display text-xs text-primary">
+                <Flower2 aria-hidden="true" className="size-3.5" strokeWidth={1.6} />
+                {day.dayLabel}
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+                <CalendarDays aria-hidden="true" className="size-3.5 text-primary" />
+                {day.date}
+              </span>
+            </div>
+
+            <h4 className="mt-3 font-display text-xl leading-[1.5] text-primary">{day.title}</h4>
+
+            <ul className="mt-3 space-y-2 text-sm leading-7 text-foreground/90">
+              {day.points.map((point) => (
+                <li key={point} className="flex items-start gap-2">
+                  <span aria-hidden="true" className="mt-2 size-1.5 shrink-0 rounded-full bg-secondary" />
+                  <span>{point}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="katha-meta-box mt-5 grid gap-2.5 border border-secondary/65 bg-background/65 p-3.5 sm:grid-cols-2">
+            <div className="flex items-start gap-2">
+              <Clock3 aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-primary" />
+              <div className="min-w-0">
+                <p className="text-[0.72rem] tracking-wide text-muted-foreground">कथा का समय</p>
+                <p className="text-sm font-medium leading-6 text-foreground">{day.timing}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-2">
+              <MapPin aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-primary" />
+              <div className="min-w-0">
+                <p className="text-[0.72rem] tracking-wide text-muted-foreground">कथा का स्थान</p>
+                <p className="text-sm font-medium leading-6 text-foreground">{day.venue}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
   );
 }
 
@@ -219,22 +349,7 @@ function TravelSection() {
         items={[
           { label: "पुरी में आवास", value: accommodation.puriHotel },
           { label: "कमरा व्यवस्था", value: accommodation.roomOccupancy },
-          {
-            label: "पर्सनल (अलग) कमरा",
-            value: `${formatRupees(accommodation.personalRoomSurcharge)} प्रति यात्री अतिरिक्त शुल्क`,
-          },
           { label: "कोलकाता में विश्राम", value: accommodation.kolkataStay },
-          {
-            label: "ट्रेन किराया",
-            value: (
-              <>
-                <span className="block">{accommodation.trainFare}</span>
-                <span className="mt-3 block">
-                  <ChipList items={accommodation.trainClasses} />
-                </span>
-              </>
-            ),
-          },
           {
             label: "यात्रा समिति द्वारा परिवहन",
             value: <ChipList items={accommodation.committeeTransport} />,
@@ -246,31 +361,68 @@ function TravelSection() {
   );
 }
 
-function GuestList({ guests, title }: { guests: readonly GuestProfile[]; title: string }) {
-  if (guests.length === 0) {
+function YajmanList({
+  yajmans,
+  title,
+  variant,
+}: {
+  yajmans: readonly YajmanProfile[];
+  title: string;
+  variant: "chief" | "regular";
+}) {
+  if (yajmans.length === 0) {
     return (
       <EmptyDetails
         title={title}
-        description="अतिथियों का विवरण उपलब्ध होने पर यहां जोड़ा जाएगा।"
+        description={
+          variant === "chief"
+            ? "मुख्य यजमान का विवरण एवं छायाचित्र उपलब्ध होने पर यहां जोड़े जाएंगे।"
+            : "यजमानों का विवरण एवं छायाचित्र उपलब्ध होने पर यहां जोड़े जाएंगे।"
+        }
       />
     );
   }
 
+  const isChief = variant === "chief";
+
   return (
-    <ul className="grid gap-4">
-      {guests.map((guest) => (
-        <li key={guest.name} className="royal-card p-5 text-center">
-          {guest.image ? (
-            <img
-              src={guest.image}
-              alt={guest.name}
-              className="mx-auto mb-4 h-40 w-32 border border-secondary object-cover"
-              loading="lazy"
-              decoding="async"
-            />
+    <ul
+      className={
+        isChief
+          ? "flex flex-wrap justify-center gap-6"
+          : "grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3"
+      }
+    >
+      {yajmans.map((yajman) => (
+        <li
+          key={yajman.name}
+          className={`royal-card yajman-card flex flex-col items-center p-5 text-center ${
+            isChief ? "w-full max-w-[16rem] sm:p-6" : ""
+          }`}
+        >
+          {yajman.image ? (
+            <div
+              className={`yajman-portrait mx-auto mb-4 overflow-hidden border-2 border-secondary bg-card p-1 shadow-md ${
+                isChief ? "w-40" : "w-32"
+              }`}
+            >
+              <img
+                src={yajman.image}
+                alt={yajman.name}
+                className="aspect-[3/4] h-full w-full object-cover object-top"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
           ) : null}
-          <p className="font-display text-xl leading-[1.5] text-foreground">{guest.name}</p>
-          {guest.title ? <p className="mt-1 text-sm text-muted-foreground">{guest.title}</p> : null}
+          <p
+            className={`font-display leading-[1.5] text-foreground ${
+              isChief ? "text-xl text-primary" : "text-lg"
+            }`}
+          >
+            {yajman.name}
+          </p>
+          {yajman.title ? <p className="mt-1 text-sm text-muted-foreground">{yajman.title}</p> : null}
         </li>
       ))}
     </ul>
@@ -281,7 +433,7 @@ function PhoneLink({ name, phone }: { name: string; phone: string }) {
   return (
     <a
       href={`tel:${phone}`}
-      className="flex min-h-12 items-center justify-between gap-3 border-b border-border px-5 py-2 last:border-b-0"
+      className="flex min-h-12 items-center justify-between gap-3 border-b border-border px-5 py-2 transition-colors hover:bg-accent/30 last:border-b-0"
     >
       <span className="min-w-0 text-base">{name}</span>
       <span className="inline-flex shrink-0 items-center gap-2 text-sm text-primary">
@@ -312,7 +464,7 @@ function InformationSection() {
       </div>
 
       <h3 className="mt-10 text-center text-xl leading-[1.5] text-foreground">संपर्क सूत्र</h3>
-      <div className="mt-4 space-y-4">
+      <div className="mt-4 grid gap-4 md:grid-cols-2">
         {contactGroups.map((group) => (
           <div key={group.region} className="royal-card">
             <p className="border-b border-border px-5 py-2 font-display text-lg leading-[1.5] text-primary">
@@ -333,14 +485,14 @@ function InformationSection() {
             description="वीडियो उपलब्ध होने पर यहां जोड़े जाएंगे।"
           />
         ) : (
-          <ul className="grid gap-3">
+          <ul className="grid gap-3 md:grid-cols-2">
             {videos.map((video) => (
               <li key={video.url}>
                 <a
                   href={video.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="royal-card block overflow-hidden"
+                  className="royal-card block overflow-hidden transition-transform hover:-translate-y-0.5"
                 >
                   {video.thumbnail ? (
                     <img
