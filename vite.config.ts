@@ -8,11 +8,14 @@
 // hosting already compresses at the edge.
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
-
+import tsconfigPaths from 'vite-tsconfig-paths';
 export default defineConfig({
+  // any extra Vite options go inside the `vite` key
+  vite: {
+    // e.g. custom server port, env variable defaults, etc.
+    // but keep it empty if you have nothing else to change.
+  },
   tanstackStart: {
-    // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
-    // nitro/vite builds from this
     server: { entry: "server" },
   },
 });
