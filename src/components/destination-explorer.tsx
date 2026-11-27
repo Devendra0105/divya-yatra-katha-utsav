@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { ArrowUpRight, ImageOff, MapPinned } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -12,71 +12,100 @@ import {
 } from "@/components/ui/dialog";
 import { destinations, type Destination } from "@/data/destinations";
 
-const allRegions = "सभी";
+type Scene = { destination: Destination; no: number; hero: boolean };
+type Chapter = { region: string; scenes: Scene[] };
+
+// Presentation-only focal points so the portrait/square crops keep each landmark in frame.
+const focalPoint: Record<string, string> = {
+  "konark-sun-temple": "72% 50%",
+  "lingaraj-temple": "80% 50%",
+  "howrah-bridge": "80% 50%",
+  "chandrabhaga-beach": "28% 50%",
+  gangasagar: "35% 50%",
+  "swaminarayan-temple-kolkata": "50% 65%",
+};
+
+const toDevanagari = (value: number) =>
+  String(value)
+    .padStart(2, "0")
+    .replace(/\d/g, (digit) => "०१२३४५६७८९"[Number(digit)] ?? digit);
+
+const sceneRange = (chapter: Chapter) => {
+  const first = chapter.scenes[0]?.no ?? 1;
+  const last = chapter.scenes[chapter.scenes.length - 1]?.no ?? first;
+  return first === last ? toDevanagari(first) : `${toDevanagari(first)} – ${toDevanagari(last)}`;
+};
+
+/** Groups the existing destination list by its own `region` field, in first-appearance order. */
+function buildChapters(items: readonly Destination[]): Chapter[] {
+  const chapters = new Map<string, Chapter>();
+  items.forEach((destination, index) => {
+    const chapter = chapters.get(destination.region) ?? { region: destination.region, scenes: [] };
+    chapter.scenes.push({ destination, no: index + 1, hero: chapter.scenes.length === 0 });
+    chapters.set(destination.region, chapter);
+  });
+  return [...chapters.values()];
+}
 
 export function DestinationExplorer() {
-  const [activeRegion, setActiveRegion] = useState(allRegions);
-  const regions = useMemo(
-    () => [allRegions, ...new Set(destinations.map((destination) => destination.region))],
-    [],
-  );
-  const visibleDestinations =
-    activeRegion === allRegions
-      ? destinations
-      : destinations.filter((destination) => destination.region === activeRegion);
+  const chapters = useMemo(() => buildChapters(destinations), []);
 
   return (
-    <div>
-      <div
-        className="mb-6 flex flex-wrap justify-center gap-2"
-        aria-label="क्षेत्र अनुसार स्थल छांटें"
-      >
-        {regions.map((region) => (
-          <Button
-            key={region}
-            aria-pressed={activeRegion === region}
-            className="min-h-11 px-4 text-sm"
-            onClick={() => setActiveRegion(region)}
-            size="sm"
-            variant={activeRegion === region ? "default" : "outline"}
-          >
-            {region}
-          </Button>
-        ))}
-      </div>
-
-      <div className="grid gap-5">
-        {visibleDestinations.map((destination) => (
-          <DestinationCard key={destination.id} destination={destination} />
-        ))}
-      </div>
+    <div className="temple-band">
+      {chapters.map((chapter) => (
+        <section key={chapter.region} aria-label={chapter.region}>
+          <div className="chapter-head" data-reveal="up">
+            <p className="chapter-no">{sceneRange(chapter)}</p>
+            <h3 className="chapter-title">{chapter.region}</h3>
+            <p className="chapter-count">{chapter.scenes.length} दर्शन स्थल</p>
+            <span className="chapter-rule" aria-hidden="true" />
+          </div>
+          {chapter.scenes.map((scene) => (
+            <DestinationScene key={scene.destination.id} scene={scene} />
+          ))}
+        </section>
+      ))}
     </div>
   );
 }
 
-function DestinationCard({ destination }: { destination: Destination }) {
+function DestinationScene({ scene }: { scene: Scene }) {
+  const { destination, no, hero } = scene;
   return (
     <Dialog>
-      <article className="overflow-hidden border border-secondary/60 bg-card/80 shadow-sm">
+      <div className="scene-wrap">
         <DialogTrigger asChild>
-          <Button
+          <button
+            type="button"
             aria-label={`${destination.title} का विवरण खोलें`}
-            className="h-auto w-full flex-col items-stretch rounded-none p-0 text-left whitespace-normal hover:bg-transparent"
-            variant="ghost"
+            className={`scene ${hero ? "scene--tall" : "scene--square"}`}
           >
-            <DestinationImage destination={destination} className="aspect-[4/3]" />
-            <span className="block px-5 pb-5 pt-4 text-left">
-              <span className="block text-xs text-primary">{destination.location}</span>
-              <span className="mt-1 block font-display text-xl leading-[1.5] text-foreground">
-                {destination.title}
-              </span>
-              <span className="mt-3 inline-flex items-center gap-2 text-sm text-primary">
+            <span className="scene__media">
+              {destination.image ? (
+                <img
+                  src={destination.image}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  className="scene__img"
+                  style={{ objectPosition: focalPoint[destination.id] ?? "50% 50%" }}
+                />
+              ) : (
+                <span className="scene__fallback" />
+              )}
+            </span>
+            <span className="scene__shade" aria-hidden="true" />
+            <span className="scene__text">
+              <span className="scene__no">{toDevanagari(no)}</span>
+              <span className="scene__title">{destination.title}</span>
+              <span className="scene__meta">{destination.location}</span>
+              <span className="scene__cta">
                 दर्शन विवरण <ArrowUpRight aria-hidden="true" className="size-4" />
               </span>
             </span>
-          </Button>
+          </button>
         </DialogTrigger>
-      </article>
+      </div>
       <DestinationDialog destination={destination} />
     </Dialog>
   );
