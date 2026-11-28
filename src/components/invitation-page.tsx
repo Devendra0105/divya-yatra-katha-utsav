@@ -218,8 +218,13 @@ function KathaSection() {
 
         <div className="mt-6 space-y-6">
           {kathaSchedule.map((day, index) => (
-            <KathaDayCard key={day.dayNumber} day={day} imageLeft={index % 2 === 0} />
-          ))}
+  <KathaDayCard
+    key={day.dayNumber}
+    day={day}
+    // force side‑by‑side layout for every screen size
+    imageLeft={index % 2 === 0}   // keeps the zig‑zag order
+  />
+))}
         </div>
       </div>
     </PageSection>
@@ -234,10 +239,10 @@ function KathaDayCard({ day, imageLeft }: { day: KathaDay; imageLeft: boolean })
       aria-label={`${day.dayLabel} — ${day.date}`}
     >
       <div
-        className={`grid items-stretch gap-0 md:grid-cols-12 ${
-          imageLeft ? "" : "katha-day--reversed"
-        }`}
-      >
+  className={`grid md:grid-cols-12 gap-0 ${
+    imageLeft ? "" : "katha-day--reversed"
+  }`}
+>
         <div
           className={`katha-day__media flex flex-col items-center justify-center border-b border-secondary/40 p-5 md:col-span-5 md:border-b-0 ${
             imageLeft
@@ -383,6 +388,9 @@ function YajmanList({
       />
     );
   }
+  <article
+  className="royal-card katha-day overflow-hidden animate-fadeIn"
+></article>
 
   const isChief = variant === "chief";
 
@@ -396,24 +404,24 @@ function YajmanList({
     >
       {yajmans.map((yajman) => (
         <li
-          key={yajman.name}
-          className={`royal-card yajman-card flex flex-col items-center p-5 text-center ${
-            isChief ? "w-full max-w-[16rem] sm:p-6" : ""
-          }`}
-        >
+  key={yajman.name}
+  className={`royal-card yajman-card flex flex-col items-center p-5 text-center animate-fadeIn ${
+    isChief ? "w-full max-w-[16rem] sm:p-6" : ""
+  }`}
+>
           {yajman.image ? (
             <div
-              className={`yajman-portrait mx-auto mb-4 overflow-hidden border-2 border-secondary bg-card p-1 shadow-md ${
-                isChief ? "w-40" : "w-32"
-              }`}
-            >
+  className={`yajman-portrait mx-auto mb-4 overflow-hidden border-2 border-secondary bg-card p-1 shadow-md ${
+    isChief ? "w-48" : "w-40"
+  }`}
+>
               <img
-                src={yajman.image}
-                alt={yajman.name}
-                className="aspect-[3/4] h-full w-full object-cover object-top"
-                loading="lazy"
-                decoding="async"
-              />
+  src={yajman.image}
+  alt={yajman.name}
+  className="w-full h-auto object-cover aspect-[4/3]"
+  loading="lazy"
+  decoding="async"
+/>
             </div>
           ) : null}
           <p
