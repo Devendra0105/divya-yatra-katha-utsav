@@ -1,48 +1,54 @@
-// src/components/BackgroundMusic.tsx
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 
 export default function BackgroundMusic() {
-  // Keep a stable audio element reference between renders
+  // keep a stable reference so we don’t recreate the element on every render
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    // Create the element only once
-    const audio = new Audio('/audio/music.mp3');
+    // 1️⃣ create the audio element once
+    const audio = new Audio("/audio/music.mp3"); // ensure this file exists
     audioRef.current = audio;
 
-    // Softer volume & muted autoplay fallback for mobile browsers
-    audio.volume = 0.10; // a touch softer than before
-    audio.muted = true; // start muted so autoplay is allowed
+    // 2️⃣ muted autoplay (allowed on all mobile browsers)
+    audio.muted = true;      // required for autoplay
+    audio.volume = 0.10;     // soft volume
     audio.autoplay = true;
-    audio.loop = false;
+    audio.loop = true;       // <‑‑ make it loop continuously
 
-    const tryPlay = async () => {
+    // 3️⃣ try to play immediately (most browsers will allow muted playback)
+    const start = async () => {
       try {
-        await audio.play();
-        // Once playback succeeds, un‑mute for the soft background
-        audio.muted = false;
+        await audio.play(); // succeeds because it is muted
       } catch {
-        // Wait for first user interaction, then try again
-        const onFirstInteraction = async () => {
-          await audio.play().catch(() => {});
-          audio.muted = false;
-          window.removeEventListener('click', onFirstInteraction);
-          window.removeEventListener('touchstart', onFirstInteraction);
-        };
-        window.addEventListener('click', onFirstInteraction, { once: true });
-        window.addEventListener('touchstart', onFirstInteraction, { once: true });
+        // muted playback can still fail on very strict browsers – fallback to click listener
       }
     };
-    tryPlay();
+    start();
 
-    // Clean‑up when the component unmounts (e.g. navigation away)
+    // 4️⃣ user‑interaction fallback – un‑mute on the first click/touch
+    const onFirstInteraction = async () => {
+      if (audioRef.current) {
+        audioRef.current.muted = false; // become audible
+        try {
+          await audioRef.current.play(); // resume if paused
+        } catch {
+          // ignore – if the browser still blocks it, the user can tap again
+        }
+      }
+      window.removeEventListener("click", onFirstInteraction);
+      window.removeEventListener("touchstart", onFirstInteraction);
+    };
+    window.addEventListener("click", onFirstInteraction, { once: true });
+    window.addEventListener("touchstart", onFirstInteraction, { once: true });
+
+    // 5️⃣ clean up when the component unmounts (navigation away, SPA reload)
     return () => {
       audio.pause();
-      audio.src = '';
+      audio.src = "";
       audioRef.current = null;
     };
-  }, []); // re‑mount on navigation triggers a fresh play
+  }, []); // run only once for the whole SPA lifetime
 
-  // No visible UI – the <audio> element is managed in JS
-  return null;
+  // No visible UI – the <audio> element lives entirely in JS
+  return null; // (or <audio ref={audioRef as any} className="hidden" /> for debugging)
 }

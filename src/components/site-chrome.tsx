@@ -42,17 +42,6 @@ export function SiteFrame({ children }: { children: ReactNode }) {
         <div className="scroll-progress__bar" />
       </div>
       <main>{children}</main>
-      <footer className="band-bottom px-5 pt-8 text-center">
-        <OrnamentalDivider />
-        <p className="font-display text-xl leading-[1.5] text-primary">दिव्य यात्रा</p>
-        <p className="mt-1 text-sm text-muted-foreground">{katha.organizers}</p>
-        <a
-          href="#information"
-          className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm text-primary underline-offset-4 hover:underline"
-        >
-          संपर्क एवं आवश्यक सूचनाएँ <span aria-hidden="true">↑</span>
-        </a>
-      </footer>
     </PhoneShell>
   );
 }
