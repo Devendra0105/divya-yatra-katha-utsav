@@ -17,8 +17,8 @@ export function AksharHeader({ compact = false }: { compact?: boolean }) {
           src={aksharPurushottamBanner.src}
           alt={aksharPurushottamBanner.alt}
           className={`mx-auto w-auto max-w-full object-contain drop-shadow-sm ${
-            compact ? "h-12 sm:h-14" : "h-14 sm:h-16"
-          }`}
+  compact ? "h-16 sm:h-20" : "h-20 sm:h-24"
+}`}
           decoding="async"
         />
       ) : (

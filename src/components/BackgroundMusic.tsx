@@ -10,30 +10,29 @@ export default function BackgroundMusic() {
     const audio = new Audio('/audio/music.mp3');
     audioRef.current = audio;
 
-    // • soft volume (0 = muted, 1 = max)
-    audio.volume = 0.15;               // ~15 % – adjust as you like
-    // • autoplay when the page is allowed to do so
+    // Softer volume & muted autoplay fallback for mobile browsers
+    audio.volume = 0.10; // a touch softer than before
+    audio.muted = true; // start muted so autoplay is allowed
     audio.autoplay = true;
-    // • do not loop – let it finish naturally
     audio.loop = false;
 
-    // Mobile browsers block autoplay unless the media is *muted*.
-    // By keeping the volume low we still get sound, but we also add a
-    // tiny user‑interaction fallback: if the first play is rejected,
-    // try again on the first click/touch.
-    const tryPlay = () => {
-      audio.play().catch(() => {
-        // Playback blocked → wait for a user gesture
-        const onFirstInteraction = () => {
-          audio.play().catch(() => {/* still blocked, give up */});
+    const tryPlay = async () => {
+      try {
+        await audio.play();
+        // Once playback succeeds, un‑mute for the soft background
+        audio.muted = false;
+      } catch {
+        // Wait for first user interaction, then try again
+        const onFirstInteraction = async () => {
+          await audio.play().catch(() => {});
+          audio.muted = false;
           window.removeEventListener('click', onFirstInteraction);
           window.removeEventListener('touchstart', onFirstInteraction);
         };
         window.addEventListener('click', onFirstInteraction, { once: true });
         window.addEventListener('touchstart', onFirstInteraction, { once: true });
-      });
+      }
     };
-
     tryPlay();
 
     // Clean‑up when the component unmounts (e.g. navigation away)
@@ -42,8 +41,8 @@ export default function BackgroundMusic() {
       audio.src = '';
       audioRef.current = null;
     };
-  }, []);
+  }, []); // re‑mount on navigation triggers a fresh play
 
-  // We don’t render anything visible; the <audio> element is managed in JS.
+  // No visible UI – the <audio> element is managed in JS
   return null;
 }
